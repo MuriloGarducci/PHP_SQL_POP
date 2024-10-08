@@ -67,16 +67,84 @@ body {
   color: rgb(138, 43, 226);
 }
 h1 {
-  background-image: linear-gradient(to left,red, blue,red);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+color: white;
 }
 
 
+.stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1; /* Estrelas atras do body */
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 2s infinite linear;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .star:nth-child(1) {
+            width: 1px;
+            height: 1px;
+            animation-delay: 0.1s;
+        }
+
+        .star:nth-child(2) {
+            width: 3px;
+            height: 3px;
+            animation-delay: 0.5s;
+        }
+
+        .star:nth-child(3) {
+            width: 2px;
+            height: 2px;
+            animation-delay: 1s;
+        }
+
+        .erros {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  color:white;
+text-align: center;
+  border-bottom: 1px solid #ccc;
+}
+
+.erros ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.erros li {
+  margin-bottom: 10px;
+}
   </style>
 </head>
 <body>
+<div class="stars"></div>
+
   <div class="container">
     <form class="register-form" method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
       
@@ -109,6 +177,8 @@ h1 {
 </html>
 
 <?php
+$erros = array();
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // Dados de conexão com o banco de dados
   $servername = "localhost";  // Endereço do servidor MySQL
@@ -121,7 +191,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // Verifica a conexão
   if ($conn->connect_error) {
-    die("Falha na conexão: " . $conn->connect_error);
+    $erros[] = "Falha na conexão: " . $conn->connect_error;
   }
 
   // Recebe os dados do formulário
@@ -130,20 +200,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
   // Verifica se ambos os campos estão preenchidos
   if (empty($usuario) || empty($senha)) {
-    echo "Erro: ambos os campos devem ser preenchidos.";
-    exit;
+    $erros[] = "Erro: ambos os campos devem ser preenchidos";
   }
 
   // Verifica se a senha tem menos de 8 caracteres
   if (strlen($senha) < 8) {
-    echo "Erro: a senha deve ter ao menos 8 caracteres.";
-    exit;
+    $erros[] = "Erro: a senha deve ter pelo menos 8 caracteres";
   }
 
   // Verifica se o usuário é um endereço válido de email
   if (!filter_var($usuario, FILTER_VALIDATE_EMAIL)) {
-    echo "Erro: o usuário deve ser um endereço válido de email.";
-    exit;
+    $erros[] = "Erro: endereço de email inválido";
   }
 
   // Verifica se já há um usuário com o mesmo email cadastrado
@@ -153,23 +220,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $stmt->execute();
   $result = $stmt->get_result();
   if ($result->num_rows > 0) {
-    echo "Erro: usuário já cadastrado.";
-    exit;
+    $erros[] = "Erro: usuário já cadastrado";
   }
 
-  // Hash da senha para segurança
-  $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
+  // Se não houver erros, executa a consulta SQL
+  if (empty($erros)) {
+    // Hash da senha para segurança
+    $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-  // Prepara a consulta SQL
-  $sql = "INSERT INTO Logins (usuario, senha) VALUES (?, ?)";
-  $stmt = $conn->prepare($sql);
-  $stmt->bind_param("ss", $usuario, $senhaHash); 
+    // Prepara a consulta SQL
+    $sql = "INSERT INTO Logins (usuario, senha) VALUES (?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $usuario, $senhaHash); 
 
-  // Executa a consulta
-  if ($stmt->execute()) {
-    echo "Registro realizado com sucesso!";
-  } else {
-    echo "Erro ao registrar: " . $stmt->error;
+    // Executa a consulta
+    if (!$stmt->execute()) {
+      $erros[] = "Erro ao registrar: " . $stmt->error;
+    } else {
+      $erros[] = "Registro realizado com sucesso!";
+    }
   }
 
   // Fecha a conexão
@@ -177,3 +246,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $conn->close();
 }
 ?>
+
+<!-- Exibe as mensagens de erro -->
+<?php if (!empty($erros)) : ?>
+  <div class="erros">
+    <ul>
+      <?php foreach ($erros as $erro) : ?>
+        <li><?= $erro ?></li>
+      <?php endforeach; ?>
+    </ul>
+  </div>
+<?php endif; ?>
+<script>
+    const numStars = 200; // Número de estrelas
+  const starsContainer = document.querySelector('.stars');
+
+  for (let i = 0; i < numStars; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+
+    // Posicione aleatoriamente dentro da janela de visualização
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
+
+    starsContainer.appendChild(star);
+  }
+  </script>

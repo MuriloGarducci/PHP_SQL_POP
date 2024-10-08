@@ -65,19 +65,13 @@ if (isset($_REQUEST["validar"]) && $_REQUEST["validar"] == true) {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    text-align: center;
+    margin-top: -7%;
 }
 .container {
     text-align: center;
 }
-input[type="text"],
-input[type="submit"] {
-    padding: 10px;
-    margin: 5px;
-    border: none;
-    border-radius: 5px;
-    background-color: #333;
-    color: #fff;
-}
+
 input[type="submit"] {
     background-image: linear-gradient(to right, rgb(138, 43, 226), rgb(138, 50, 250), rgb(199, 21, 133));
     cursor: pointer;
@@ -86,12 +80,89 @@ label {
     font-size: 22px;
 }
 h2 {
-    font-size: 30px;
+            color: white;
+            font-size: 40px;
+
+        }
+a{
+    text-decoration: none;
+    color:white;
+    font-size: 25px;
 }
+input[type="text"],
+input[type="submit"],
+select { /* Adicione o select */
+    padding: 10px;
+    margin: 5px 0; /* Altere o margin para 5px em cima e embaixo */
+    border: none;
+    border-radius: 5px;
+    background-color: #333;
+    color: #fff;
+    width: 100%; /* Ajuste a largura para ocupar o espaço disponível */
+    box-sizing: border-box; /* Inclua o padding e border na largura */
+}
+input[type="submit"] {
+    background-image: linear-gradient(to right, rgb(138, 43, 226), rgb(138, 50, 250), rgb(199, 21, 133));
+    cursor: pointer;
+}
+label {
+    display: block; /* Faz a label ocupar uma linha completa */
+    margin-bottom: 5px; /* Espaço entre a label e o input */
+}
+
+.stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1; /* Estrelas atras do body */
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #fff;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 2s infinite linear;
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .star:nth-child(1) {
+            width: 1px;
+            height: 1px;
+            animation-delay: 0.1s;
+        }
+
+        .star:nth-child(2) {
+            width: 3px;
+            height: 3px;
+            animation-delay: 0.5s;
+        }
+
+        .star:nth-child(3) {
+            width: 2px;
+            height: 2px;
+            animation-delay: 1s;
+        }
     </style>
 </head>
 <body>
-
+<div class="stars"></div>
     <?php
     if ($valido == true) {
         echo "<p>Música cadastrada com sucesso!</p>";
@@ -104,7 +175,7 @@ h2 {
         <form method="POST" action="?validar=true">
             <h2>Cadastro de Músicas</h2>
             <label for="banda_id">Banda:</label>
-            <br>
+           
             <select name="banda_id" id="banda_id">
                 <option value="">Selecione a banda</option>
                 <?php
@@ -116,13 +187,13 @@ h2 {
             </select>
             <br>
             <label for="nome">Nome da Música:</label>
-            <br>
             <input type="text" name="nome" id="nome" 
                    value="<?php if (isset($_POST["nome"])) {
                        echo $_POST["nome"];
                    } ?>">
             <br>
-            <input type="submit" value="Cadastrar">
+            <input type="submit" value="Cadastrar"><br>
+            <a href="Menu.html">Menu</a>
         </form>
 
         <?php if (isset($_GET["banda_id"]) && !empty($_GET["banda_id"])) { ?>
@@ -145,3 +216,19 @@ h2 {
     ?>
 </body>
 </html>
+
+<script>  const numStars = 200; // Número de estrelas
+  const starsContainer = document.querySelector('.stars');
+
+  for (let i = 0; i < numStars; i++) {
+    const star = document.createElement('div');
+    star.classList.add('star');
+
+    // Posicione aleatoriamente dentro da janela de visualização
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    star.style.left = `${x}px`;
+    star.style.top = `${y}px`;
+
+    starsContainer.appendChild(star);
+  }</script>
